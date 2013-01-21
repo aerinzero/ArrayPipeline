@@ -1,0 +1,24 @@
+require 'rake-pipeline-web-filters'
+
+output "tmp/build"
+input "src" do 
+  match "**/*.coffee" do
+    concat 'array-pipeline.coffee'
+  end
+end
+
+output "dist"
+input "tmp/build" do
+  match "**/*.coffee" do
+    coffee_script
+    concat "array-pipeline.js"
+  end
+end
+
+output "dist"
+input "dist" do 
+  match "array-pipeline.js" do
+    uglify 
+    concat "array-pipeline.min.js"
+  end
+end
