@@ -1,11 +1,11 @@
 namespace 'test' do
 
   task :run do |t|
-    sh 'mocha --compilers coffee:coffee-script'
+    sh 'mocha --compilers coffee:coffee-script --recursive'
   end
 
   task :watch do |t|
-    sh 'mocha --compilers coffee:coffee-script -w'
+    sh 'mocha --compilers coffee:coffee-script -w --recursive'
   end
 
 end

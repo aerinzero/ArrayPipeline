@@ -1,6 +1,6 @@
 # Chai setup
 global.chai = require 'chai'
-chai.should()
+global.shoud = chai.should()
 
 # Fake window setup
 jsdom = require('jsdom').jsdom
@@ -11,3 +11,6 @@ global.window = document.createWindow()
 global.jQuery = global.$ = require 'jquery'
 global.Handlebars = require('../lib/handlebars-1.0-rc.3').Handlebars
 global.Ember = global.Em = require('../lib/ember-1.0.0-rc.1').Ember
+
+# Including the pipeline
+require('../dist/array-pipeline.js')
