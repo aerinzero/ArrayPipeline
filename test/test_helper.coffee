@@ -1,6 +1,7 @@
 # Chai setup
 global.chai = require 'chai'
-global.shoud = chai.should()
+global.should = chai.should
+global.expect = chai.expect
 
 # Fake window setup
 jsdom = require('jsdom').jsdom
