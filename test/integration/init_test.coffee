@@ -1,4 +1,4 @@
-require '../../test_helper.coffee'
+require '../test_helper.coffee'
 
 describe 'Init: ArrayPipeline', ->
 
