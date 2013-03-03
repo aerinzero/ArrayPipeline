@@ -36,4 +36,4 @@ describe 'Plugin: ArrayPipeline', ->
     results = pipeline.get('results')
 
     results.get('length').should.equal(1)
-    results.get('firstObject').should.equal @books.filterProperty('isSelected', true)
+    results.get('firstObject').should.equal @books[1]

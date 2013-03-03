@@ -20,5 +20,14 @@ describe 'ArrayPipeline', ->
         pipeline.get('_processors.firstObject').should.be.instanceof(Em.PipePlugin)
         
     describe '#_configurePlugins()', ->
-    
+
+      it 'should create instances of each plugin in the "plugins" array', ->
+        FooPlugin = Em.PipePlugin.extend()
+
+        pipeline = Em.ArrayProxy.createWithMixins Em.ArrayPipelineMixin,
+          plugins: [FooPlugin, 'Em.PipePlugin'] 
+
+        pipeline.get('_processors.firstObject').should.be.instanceof(FooPlugin)
+        pipeline.get('_processors.lastObject').should.be.instanceof(Em.PipePlugin)
+
 

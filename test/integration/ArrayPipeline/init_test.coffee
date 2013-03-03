@@ -3,7 +3,7 @@ require '../../test_helper.coffee'
 describe 'Init: ArrayPipeline', ->
 
   it 'has equal results and content arrays when no plugins are defined', ->
-    sourceArray = Em.A(['one','two','three'])
+    sourceArray = ['one','two','three']
       
     pipeline = Em.ArrayProxy.createWithMixins Ember.ArrayPipelineMixin,
       content: sourceArray

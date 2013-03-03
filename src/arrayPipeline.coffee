@@ -11,7 +11,24 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
     @type Array
     @default []
   ###
-  results: null
+  results: (->
+    # determine where to start processing
+    processors = @get('_processors')
+
+    # determine which result set to pass in to the first processor
+    results = @get('content')
+
+    # for each processor we have on and after the cursor, we want to
+      # process
+      # cache results on the plugin
+      # pass results to the next plugin
+    forEach(processors, (processor) ->
+      results = processor.process(results)
+    )
+
+    # Return our last result set
+    return results 
+  ).property()
 
 
   ###
@@ -47,9 +64,8 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
   init: -> 
     @_super()
 
-    # TODO: Remove
-    @set('results', [])
-    @set('results', @get('content')) if @get('content')?
+    # Set our content to a blank array if we do not have a content array set
+    @set 'content', [] if !@get('content')?
 
     # Configure each of our PipePlugins
     @_configurePlugins()
