@@ -91,6 +91,9 @@ If we were to change the ```age``` property on a book:
   * Adding / Removing objects from array
   * Support for side-operations
 
+# The Flow
+![Image](../master/doc/ArrayPipelineFlow.png?raw=true)
+
 # Build Environment & Contributing
   Please see the [CONTRIBUTING.md](https://github.com/Mochaleaf/ArrayPipeline/blob/master/CONTRIBUTING.md) for info on how to lend a hand, or for more information on the build environment!
 
