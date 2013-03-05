@@ -46,6 +46,8 @@ build environment, please do the following:
 1. Install Ruby
 2. Install [Bundler](http://gembundler.com)
 3. Run ```bundle install```
+4. Install Node
+5. Run ```npm install```
 
 # Tasks
 To get a list of tasks available for building, testing, cleaning, etc... run ```rake -T```.  Here
