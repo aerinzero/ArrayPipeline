@@ -54,9 +54,9 @@ To get a list of tasks available for building, testing, cleaning, etc... run ```
 is the current list (as of the time of writing this document).
 
 ```
-rake build       # Trigger a build and put files into dist/ directory
-rake clean       # Clean the dist/ directory
-rake test:run    # Run the test suite once
-rake test:watch  # Run and watch the test suite
-rake watch       # Watch for changes in src/ and trigger a build on change
+rake build:clean  # Clean the current build area
+rake build:run    # Execute a build
+rake build:watch  # Watch for changes then perform a build
+rake test:run     # Run the test suite
+rake test:watch   # Run the test suite and watch for changes
 ```
