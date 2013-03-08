@@ -37,3 +37,19 @@ Em.PipePlugin = Em.Object.extend
   init: ->
     @_super()
     @set('observes', []) if !@get('observes')?
+
+
+  ###
+    @private
+    This method is responsible for recalculating changes from the previous pipeline's result set.
+    It should:
+      1) Fetch previous plugin's results
+      2) Pass those into process
+      3) Cache processed results
+      4a) Trigger the next plugin's recalculate method
+      4b) Update 'results' on the pipeline if this was the last plugin to execute
+
+    @method _recalculate
+  ###
+  _recalculate: ->
+    @process()

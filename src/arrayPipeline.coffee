@@ -165,4 +165,5 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
     @param {String} key that is changing
   ###
   _processChanges: (changeObj, changeKey) ->
-
+    processor = @get('_observerMap').get(changeKey)
+    processor._recalculate()

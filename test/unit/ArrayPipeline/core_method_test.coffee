@@ -88,3 +88,35 @@ describe 'ArrayPipeline', ->
         pipeline.get('results').objectAt(0).observersForKey('name').length.should.equal(1)
         pipeline.get('results').objectAt(0).observersForKey('date').length.should.equal(1)
         pipeline.get('results').objectAt(0).observersForKey('age').length.should.equal(1)
+
+    describe '#_processChanges()', ->
+      it 'should trigger _recalculate() on the appropriate PipePlugin', ->
+        ran = false
+
+        FooPlugin = Em.PipePlugin.extend
+          observes: ['name', 'date']
+          _recalculate: ->
+            ran = true
+
+        BarPlugin = Em.PipePlugin.extend
+          observes: ['name', 'date']
+          _recalculate: ->
+            ran = false
+
+        Book = Em.Object.extend
+          name: null
+          date: null
+
+        books = [
+          Book.create(name: 'foo', date: 1921, age: 51)
+          Book.create(name: 'andy', date: 1984, age: 11)
+        ]
+
+        # Create a pipeline to use
+        pipeline = Em.ArrayProxy.createWithMixins Em.ArrayPipelineMixin, 
+          content: books
+          plugins: [FooPlugin, BarPlugin]
+
+        ran.should.equal(false)
+        pipeline.set('firstObject.name', 'barrr')  
+        ran.should.equal(true)
