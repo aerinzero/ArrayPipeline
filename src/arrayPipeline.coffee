@@ -53,6 +53,18 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
   ###
   _processors: null
 
+  ###
+    @private
+
+    A map of observer properties to plugin instances.  Used for determining which plugin to fire on
+    an observation change.
+
+    @property _observerMap
+    @type Em.Map
+    @default {}
+  ###
+  _observerMap: null
+
 
   ###
     @private
@@ -69,6 +81,9 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
 
     # Configure each of our PipePlugins
     @_configurePlugins()
+
+    # Configure our observer map
+    @_configureObserverMap()
 
 
   ###
@@ -99,3 +114,51 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
     @set '_processors', []
     @get('plugins').forEach (plugin) => @_initPlugin plugin
 
+
+
+  ###
+    @private
+
+    This is used to configure an observer map for all of our instantiated plugins.
+
+    @method _configureObserverMap
+  ###
+  _configureObserverMap: ->
+    map = Em.Map.create()
+
+    # For each processor we have, we'll want to set the observe properties on the map if it isn't set already
+    forEach( @get('_processors'), (processor) ->
+      forEach( processor.get('observes'), (observer) ->
+        map.set(observer, processor) if !map.get(observer)
+      )
+    )
+
+    @set '_observerMap', map
+
+  ###
+    @private
+
+    This is used to register all of the observers from our _observerMap onto each element of the content array.
+
+    @method _registerObservers
+  ###
+  _registerObservers: ->
+    self = this
+
+    # For each object in our content array, we're going to add each observer key as an observer
+    forEach( @get('content'), (item) ->
+      forEach( self.get('_observerMap').keys.toArray(), (observerKey) ->
+        item.addObserver(observerKey, self._processChanges)
+      )
+    )   
+
+    ###
+      @private
+
+      This is used to handle inbound observation changes for any element in our content array.
+      It will look up the appropriate plugin to trigger a reprocess on.
+
+      @method _processChanges
+      @param {String} key that is changing
+    ###
+    _processChanges: ->
