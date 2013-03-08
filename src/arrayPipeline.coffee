@@ -85,6 +85,8 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
     # Configure our observer map
     @_configureObserverMap()
 
+    # Register our observers
+    @_registerObservers()
 
   ###
     @private
@@ -148,17 +150,19 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
     # For each object in our content array, we're going to add each observer key as an observer
     forEach( @get('content'), (item) ->
       forEach( self.get('_observerMap').keys.toArray(), (observerKey) ->
-        item.addObserver(observerKey, self._processChanges)
+        item.addObserver(observerKey, self, self._processChanges)
       )
     )   
 
-    ###
-      @private
+  ###
+    @private
 
-      This is used to handle inbound observation changes for any element in our content array.
-      It will look up the appropriate plugin to trigger a reprocess on.
+    This is used to handle inbound observation changes for any element in our content array.
+    It will look up the appropriate plugin to trigger a reprocess on.
 
-      @method _processChanges
-      @param {String} key that is changing
-    ###
-    _processChanges: ->
+    @method _processChanges
+    @param {Em.Object} object that is changing
+    @param {String} key that is changing
+  ###
+  _processChanges: (changeObj, changeKey) ->
+
