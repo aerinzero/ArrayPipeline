@@ -90,6 +90,7 @@ If we were to change the ```age``` property on a book:
   * Observation firing *(currently WIP and will be pushed to wip branch)*
   * Adding / Removing objects from array
   * Support for side-operations
+  * Changing observed properties within a PipePlugin
 
 # The Flow
 ![Image](../master/doc/ArrayPipelineFlow.png?raw=true)
