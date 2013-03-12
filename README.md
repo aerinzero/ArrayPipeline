@@ -85,6 +85,7 @@ If we were to change the ```age``` property on a book:
 
 # What Works
   * Chaining plugins together
+  * Primitive observation firing (does not handle controller.<property> observations)
 
 # What Doesn't Work Yet
   * Observation firing *(currently WIP and will be pushed to wip branch)*
