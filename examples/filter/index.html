@@ -10,5 +10,30 @@
 </head>
 <body>
 
+  <script type="text/x-handlebars">
+    Books:
+    <ul> 
+      {{#each book in controller}}
+        <li>
+          {{book.title}} - 
+          <button {{action toggleBook book}}>
+            {{#if book.isSelected}}
+              Deselect
+            {{else}}
+              Select
+            {{/if}}
+          </button>
+        </li>
+      {{/each}}
+    </ul>
+
+    Selected Books:
+    <ul>
+      {{#each book in results}}
+        <li>{{book.title}}</li>
+      {{/each}}
+    </ul>
+  </script>
+
 </body>
 </html>
