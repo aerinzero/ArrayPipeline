@@ -11,16 +11,22 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
     @type Array
     @default []
   ###
-  results: (->
-    # determine where to start processing
-    processors = @get('_processors')
+  results: Ember.computed (key,value) ->
+    # Getter
+    if arguments.length == 1 
+      # determine where to start processing
+      processors = @get('_processors')
 
-    # for each processor we have on and after the cursor, we want to trigger a recalculate
-    forEach(processors, (processor) -> processor._recalculate() )
+      # for each processor we have on and after the cursor, we want to trigger a recalculate
+      forEach(processors, (processor) -> processor._recalculate() )
 
-    # Return our last result set or our content if we have no processors
-    if processors.length then return @get('_processors.lastObject._prevResults') else return @get('content')
-  ).property()
+      # Return our last result set or our content if we have no processors
+      if processors.length then return @get('_processors.lastObject._prevResults') else return @get('content')
+
+    # Setter
+    else
+
+      return value  
 
 
   ###
@@ -155,13 +161,33 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
   ###
   _registerObservers: ->
     self = this
+    content = @get('content') || []
 
     # For each object in our content array, we're going to add each observer key as an observer
-    forEach( @get('content'), (item) ->
+    forEach( content, (item) ->
       forEach( self.get('_observerMap').keys.toArray(), (observerKey) ->
         item.addObserver(observerKey, self, self._processChanges)
       )
     )   
+
+  ###
+    @private
+    @needsTest
+
+    This is used to unregister all of the observers from our _observerMap for each element of the content array.
+
+    @method _unregisterObservers
+  ###
+  _unregisterObservers: ->
+    self = this
+    content = @get('content') || []
+
+    # For each object in our content array, we're going to remove each observer key as an observer
+    forEach( content, (item) ->
+      forEach( self.get('_observerMap').keys.toArray(), (observerKey) ->
+        item.removeObserver(observerKey, self, self._processChanges)
+      )
+    )
 
   ###
     @private
@@ -184,3 +210,28 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
     # We update our results to reflect
     results = @get('_processors.lastObject._prevResults')
     @set('results', results)
+
+
+  ###
+    @private
+    @needsTest
+    @todo
+  
+    Used to handle when our content array changes. 
+    This needs to be implemented in a more efficient way
+
+    @method pipelineContentWillChange
+  ###
+  pipelineContentWillChange: (-> @_unregisterObservers() ).observesBefore('content')
+
+  ###
+    @private
+    @needsTest
+    @todo
+  
+    Used to handle when our content array changes. 
+    This needs to be implemented in a more efficient way
+
+    @method pipelineContentDidChange
+  ###
+  pipelineContentDidChange: (-> @_registerObservers() ).observes('content')

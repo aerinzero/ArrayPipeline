@@ -23,6 +23,18 @@ beforeEach ->
 
 describe 'PipePlugin', ->
   describe 'processing', ->
+    describe '#process', ->
+      it 'should always have an array passed as input', ->
+        pipeline = Em.ArrayProxy.createWithMixins Em.ArrayPipelineMixin, 
+          content: null
+          plugins: [FooPlugin]
+
+        fooPlugin = pipeline.get('_processors.firstObject')
+
+        fooPlugin.process = (inputArr) ->
+          inputArr.should.be.instanceof(Array)
+
+        pipeline.get('results')
 
     describe '#_lastResult()', ->
       it 'should obtain the results from the previous plugin', ->

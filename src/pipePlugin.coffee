@@ -60,7 +60,8 @@ Em.PipePlugin = Em.Object.extend
     @method _recalculate
   ###
   _recalculate: ->
-    results = @process(@_lastResult())
+    lastResult = @_lastResult() || []
+    results = @process(lastResult)
     @set('_prevResults', results)
 
 
