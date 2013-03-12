@@ -19,6 +19,14 @@ Em.PipePlugin = Em.Object.extend
   observes: null
 
   ###
+    Holds a cached version of our previous result run (to be used for recalculation events).
+
+    @property _prevResults
+    @type Array
+  ###
+  _prevResults: null
+
+  ###
     Method used for taking in array input, processing, and returning output to the next plugin in the chain.
     Each PipePlugin instance needs to override this method.
 
@@ -52,4 +60,17 @@ Em.PipePlugin = Em.Object.extend
     @method _recalculate
   ###
   _recalculate: ->
-    @process()
+    results = @process(@_lastResult())
+    @set('_prevResults', results)
+
+
+  ###
+    @private
+
+    This method will obtain the results used from the previous pipeline operation.  If there is not a plugin
+    prior to this one in the pipeline, it will be equal to the content array.
+
+    @method _lastResult
+  ###
+  _lastResult: ->
+    @get('controller').previousResults(@)

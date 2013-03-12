@@ -70,10 +70,8 @@ describe 'Observer: ArrayPipeline', ->
       # When we change the name, pipe2 and pipe3 should run
       books = pipeline.get('content')
       books.get('firstObject').set('name', 'Mooooo')
-      firedPlugins.get('length').should.equal(5)
-      firedPlugins.should.equal(['pipe1', 'pipe2', 'pipe3', 'pipe2', 'pipe3'])
+      firedPlugins.toArray().should.deep.equal(['pipe1', 'pipe2', 'pipe3', 'pipe2', 'pipe3'])
 
       # When we change the year, only pipe3 should run
       books.get('firstObject').set('year', 1999)
-      firedPlugins.get('length').should.equal(6)
-      firedPlugins.should.equal(['pipe1', 'pipe2', 'pipe3', 'pipe2', 'pipe3', 'pipe3'])
+      firedPlugins.toArray().should.deep.equal(['pipe1', 'pipe2', 'pipe3', 'pipe2', 'pipe3', 'pipe3'])

@@ -15,19 +15,11 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
     # determine where to start processing
     processors = @get('_processors')
 
-    # determine which result set to pass in to the first processor
-    results = @get('content')
+    # for each processor we have on and after the cursor, we want to trigger a recalculate
+    forEach(processors, (processor) -> processor._recalculate() )
 
-    # for each processor we have on and after the cursor, we want to
-      # process
-      # cache results on the plugin
-      # pass results to the next plugin
-    forEach(processors, (processor) ->
-      results = processor.process(results)
-    )
-
-    # Return our last result set
-    return results 
+    # Return our last result set or our content if we have no processors
+    if processors.length then return @get('_processors.lastObject._prevResults') else return @get('content')
   ).property()
 
 
@@ -65,6 +57,24 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
   ###
   _observerMap: null
 
+  ###
+    Returns back the previous results for a given PipePlugin.
+
+    @method previousResults
+    @param {Em.PipePlugin object} Em.PipePlugin instance from _processors
+    @return {Array} results from the previous plugin's result set (or content array if first plugin)
+  ###
+  previousResults: (plugin) ->
+    index = @get('_processors').indexOf(plugin)
+
+    # Return no results if this plugin is not a part of the pipeline processors list
+    return [] if index == -1
+
+    # Return back our content array if this is the first plugin
+    return @get('content')  if index == 0
+
+    # Return back our _prevResults from our plugin if we are not the first one
+    return @get('_processors').objectAt(index-1).get('_prevResults')
 
   ###
     @private
@@ -117,7 +127,6 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
     @get('plugins').forEach (plugin) => @_initPlugin plugin
 
 
-
   ###
     @private
 
@@ -165,5 +174,13 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
     @param {String} key that is changing
   ###
   _processChanges: (changeObj, changeKey) ->
-    processor = @get('_observerMap').get(changeKey)
-    processor._recalculate()
+    # We start off by getting the position in the pipeline for where to recalculate changes
+    beginProcessor = @get('_observerMap').get(changeKey)
+    beginIndex = @get('_processors').indexOf(beginProcessor)
+
+    # We recalculate for each processor on/after the given processor 
+    processor._recalculate() for processor in @get('_processors')[beginIndex..]
+
+    # We update our results to reflect
+    results = @get('_processors.lastObject._prevResults')
+    @set('results', results)

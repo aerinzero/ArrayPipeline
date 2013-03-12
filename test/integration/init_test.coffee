@@ -21,3 +21,22 @@ describe 'Init: ArrayPipeline', ->
     pipeline = Em.ArrayProxy.createWithMixins Ember.ArrayPipelineMixin,
       content: sourceArray
     expect(pipeline.get('results')).to.be.instanceof(Array)
+
+  it 'does not calculate results until trying to use the results array', ->
+    run = false
+
+    TestPlugin = Em.PipePlugin.extend
+      process: (inputArr) ->
+        run = true
+        return inputArr
+
+    pipeline = Em.ArrayProxy.createWithMixins Em.ArrayPipelineMixin,
+      content: []
+      plugins: [TestPlugin]
+
+    run.should.equal(false)
+
+    # Trigger calculation
+    pipeline.get('results')
+
+    run.should.equal(true)

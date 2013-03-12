@@ -91,17 +91,17 @@ describe 'ArrayPipeline', ->
 
     describe '#_processChanges()', ->
       it 'should trigger _recalculate() on the appropriate PipePlugin', ->
-        ran = false
+        ran = []
 
         FooPlugin = Em.PipePlugin.extend
           observes: ['name', 'date']
           _recalculate: ->
-            ran = true
+            ran.pushObject('pipe1')
 
         BarPlugin = Em.PipePlugin.extend
           observes: ['name', 'date']
           _recalculate: ->
-            ran = false
+            ran.pushObject('pipe2')
 
         Book = Em.Object.extend
           name: null
@@ -117,6 +117,37 @@ describe 'ArrayPipeline', ->
           content: books
           plugins: [FooPlugin, BarPlugin]
 
-        ran.should.equal(false)
+        ran.should.deep.equal([])
         pipeline.set('firstObject.name', 'barrr')  
-        ran.should.equal(true)
+        ran.toArray().should.deep.equal(['pipe1', 'pipe2'])
+
+  describe '#previousResults(plugin)', ->
+    it 'should return back the results from the previous plugin that is passed in', ->
+      Book = Em.Object.extend
+        name: null
+        date: null
+        age: null
+
+      FooPlugin = Em.PipePlugin.extend
+        process: (inputArr) -> 
+          inputArr.map (item) -> return 1
+
+      BarPlugin = Em.PipePlugin.extend
+        process: (inputArr) ->
+          inputArr.map (item) -> return 2
+
+      books = [
+        Book.create(name: 'foo', date: 1921, age: 51)
+        Book.create(name: 'andy', date: 1984, age: 11)
+      ]
+
+      pipeline = Em.ArrayProxy.createWithMixins Em.ArrayPipelineMixin, 
+        content: books
+        plugins: [FooPlugin, BarPlugin, BarPlugin]
+
+      # Trigger a calculation
+      pipeline.get('results')
+
+      # Do our test 
+      lastPlugin = pipeline.get('_processors').objectAt(1)
+      pipeline.previousResults(lastPlugin).should.deep.equal([1,1])
