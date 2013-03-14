@@ -8,6 +8,15 @@ App.BookSelectionFilter = Em.PipePlugin.extend({
   }
 });
 
+App.SortThing = Em.PipePlugin.extend({
+  observes: ['title'],
+  process: function(inputArr) {
+    return inputArr.sort(function(o1,o2) {
+      return Ember.compare(o1.get('title'), o2.get('title'));
+    });
+  }
+});
+
 App.Book = Em.Object.extend({
   title: null,
   isSelected: false  
@@ -29,7 +38,7 @@ App.ApplicationRoute = Em.Route.extend({
 })
 
 App.ApplicationController = Em.ArrayController.extend(Em.ArrayPipelineMixin,{
-  plugins: [App.BookSelectionFilter],
+  plugins: [App.BookSelectionFilter, App.SortThing],
 
   toggleBook: function(book) {
     book.toggleProperty('isSelected');
