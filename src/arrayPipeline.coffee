@@ -154,21 +154,71 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
 
   ###
     @private
+    @needsTest
+  
+    This is used for obtaining our observer keys that pertain to our controller
+
+    @method _observerKeysForController
+  ###
+  _observerKeysForController: ( ->
+    regex = new RegExp('^controller.(.+)$')
+    observerKeys = []
+
+    # Filter out only those keys beginning w/ controller and strip off the controller. prefix
+    if @get('_observerMap')?
+      @get('_observerMap').keys.toArray().forEach (key) ->
+        match = key.match(regex)
+        observerKeys.pushObject(match[1]) if match?
+
+    return observerKeys
+  ).property('_observerMap.@each')
+
+  ###
+    @private
+    @needsTest
+  
+    This is used for obtaining our observer keys that pertain to our objects
+
+    @method _observerKeysForController
+  ###
+  _observerKeysForObjects:( ->
+    regex = new RegExp('^controller.(.+)$')
+
+    # Filter out only those keys beginning w/ controller and strip off the controller. prefix
+    if @get('_observerMap')?
+      return @get('_observerMap').keys.toArray().filter (key) -> 
+        return !key.match(regex)
+    else
+      return []
+  ).property('_observerMap.@each')
+
+
+  ###
+    @private
 
     This is used to register all of the observers from our _observerMap onto each element of the content array.
+    Additionally, if the observer matches "controller.<path>" it will register the observer onto the ArrayProxy/Controller
 
     @method _registerObservers
   ###
   _registerObservers: ->
     self = this
     content = @get('content') || []
+    controller = @get('controller')
+    objectKeys = @get('_observerKeysForObjects')
+    controllerKeys = @get('_observerKeysForController')
 
     # For each object in our content array, we're going to add each observer key as an observer
     forEach( content, (item) ->
-      forEach( self.get('_observerMap').keys.toArray(), (observerKey) ->
+      forEach( objectKeys, (observerKey) ->
         item.addObserver(observerKey, self, self._processChanges)
       )
-    )   
+    )
+
+    # For each controller observer key, we're going to add each observer of each key to our controller
+    forEach( controllerKeys, (observerKey) ->
+      self.addObserver(observerKey, self, self._processChanges)
+    )
 
   ###
     @private
@@ -181,12 +231,19 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
   _unregisterObservers: ->
     self = this
     content = @get('content') || []
+    objectKeys = @get('_observerKeysForObjects')
+    controllerKeys = @get('_observerKeysForController')
 
     # For each object in our content array, we're going to remove each observer key as an observer
     forEach( content, (item) ->
-      forEach( self.get('_observerMap').keys.toArray(), (observerKey) ->
+      forEach( objectKeys, (observerKey) ->
         item.removeObserver(observerKey, self, self._processChanges)
       )
+    )
+
+    # for each controllerkey, we should unregister from it as well
+    forEach( controllerKeys, (observerKey) ->
+      self.removeObserver(observerKey, self, self._processChanges)
     )
 
   ###

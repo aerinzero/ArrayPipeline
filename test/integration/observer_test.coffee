@@ -30,6 +30,12 @@ Pipe3 = Em.PipePlugin.extend
     firedPlugins.pushObject 'pipe3'
     return inputArr
 
+Pipe4 = Em.PipePlugin.extend
+  observes: ['controller.selectedBook']
+  process: (inputArr) ->
+    firedPlugins.pushObject 'pipe4'
+    return inputArr
+
 beforeEach ->
   firedPlugins = []
 
@@ -58,7 +64,6 @@ beforeEach ->
 describe 'Observer: ArrayPipeline', ->
 
   describe 'each PipePlugin', ->
-
     it 'registers observers for each property in "observes" if it is the firstResponder', ->
       # Our fired list should start at 0
       firedPlugins.get('length').should.equal(0)  
@@ -75,3 +80,22 @@ describe 'Observer: ArrayPipeline', ->
       # When we change the year, only pipe3 should run
       books.get('firstObject').set('year', 1999)
       firedPlugins.toArray().should.deep.equal(['pipe1', 'pipe2', 'pipe3', 'pipe2', 'pipe3', 'pipe3'])
+
+    it 'registers observers destined for our controller', ->
+      # setup
+      books = [Book.create(name: "andy", isSelected: false, year: 2012)]
+      pipeline = Em.ArrayProxy.createWithMixins Em.ArrayPipelineMixin,
+        content: books
+        plugins: [Pipe4]
+        selectedBook: null
+
+      # test initial state
+      firedPlugins.get('length').should.equal(0)
+
+      # set our book on our controller
+      book = books.get('firstObject')
+      pipeline.set('selectedBook', book)
+
+      # pipe plugin should have refired
+      firedPlugins.toArray().should.deep.equal(['pipe4'])
+
