@@ -2,6 +2,8 @@
 
 **Note: Core functionality is still being implemented.  Please look at the [Issues list](https://github.com/Mochaleaf/ArrayPipeline/issues) to see what is actively being worked on.**
 
+** This branch is used for a compiled version of ArrayPipeline.  It may not be up to date with master/wip **
+
 **Master:** [![Build Status](https://secure.travis-ci.org/Mochaleaf/ArrayPipeline.png?branch=master)](http://travis-ci.org/Mochaleaf/ArrayPipeline)
 
 **Wip:** [![Build Status](https://secure.travis-ci.org/Mochaleaf/ArrayPipeline.png?branch=wip)](http://travis-ci.org/Mochaleaf/ArrayPipeline)

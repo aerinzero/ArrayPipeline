@@ -1,5 +1,14 @@
 Gemfile.lock
-dist/**
 tmp/**
 .DS_Store
 /node_modules/
+lib/**
+src/**
+test/**
+Assetfile
+.travis.yml
+Gemfile
+Gemfile.lock
+Guardfile
+package.json
+Rakefile
