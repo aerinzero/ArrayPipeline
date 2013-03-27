@@ -11,7 +11,7 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
     @type Array
     @default []
   ###
-  results: Ember.computed (key,value) ->
+  results: Ember.computed 'content', (key,value) ->
     # Getter
     if arguments.length == 1 
       # determine where to start processing
@@ -25,7 +25,6 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
 
     # Setter
     else
-
       return value  
 
 

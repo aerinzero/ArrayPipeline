@@ -99,3 +99,16 @@ describe 'Observer: ArrayPipeline', ->
       # pipe plugin should have refired
       firedPlugins.toArray().should.deep.equal(['pipe4'])
 
+  describe 'ArrayPipeline observations', ->
+    it 'updates the results set when you change the backing array content', ->
+      arrayOne = [Book.create(name:'foo')]
+      arrayTwo = [Book.create(name:'bar')]
+
+      pipeline = Em.ArrayProxy.createWithMixins Em.ArrayPipelineMixin,
+        content: arrayOne
+        plugins: []
+
+      pipeline.get('results').should.deep.equal(arrayOne)
+
+      pipeline.set('content', arrayTwo)
+      pipeline.get('results').should.deep.equal(arrayTwo)
