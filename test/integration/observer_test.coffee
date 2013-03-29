@@ -61,9 +61,9 @@ beforeEach ->
 # Tests
 ###
 
-describe 'Observer: ArrayPipeline', ->
+describe 'Observers:', ->
 
-  describe 'each PipePlugin', ->
+  describe 'PipePlugin', ->
     it 'registers observers for each property in "observes" if it is the firstResponder', ->
       # Our fired list should start at 0
       firedPlugins.get('length').should.equal(0)  
@@ -99,7 +99,7 @@ describe 'Observer: ArrayPipeline', ->
       # pipe plugin should have refired
       firedPlugins.toArray().should.deep.equal(['pipe4'])
 
-  describe 'ArrayPipeline observations', ->
+  describe 'ArrayPipeline', ->
     it 'updates the results set when you change the backing array content', ->
       arrayOne = [Book.create(name:'foo')]
       arrayTwo = [Book.create(name:'bar')]
@@ -112,3 +112,20 @@ describe 'Observer: ArrayPipeline', ->
 
       pipeline.set('content', arrayTwo)
       pipeline.get('results').should.deep.equal(arrayTwo)
+
+    it 'unregisters observers from the previous backing array content when changed', ->
+      arrayOne = [Book.create(name:'foo')]
+      arrayTwo = [Book.create(name:'foo')]
+
+      Plugin = Em.PipePlugin.extend
+        observes: ['name']
+        process: (inputArr) -> return inputArr
+
+      pipeline = Em.ArrayProxy.createWithMixins Em.ArrayPipelineMixin,
+        content: arrayOne
+        plugins: [Plugin]
+
+      Ember.observersFor(arrayOne.get('firstObject'), 'name').length.should.equal(1)
+
+      pipeline.set('content', arrayTwo)
+      Ember.observersFor(arrayOne.get('firstObject'), 'name').length.should.equal(0)

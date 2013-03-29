@@ -72,17 +72,17 @@ describe 'Plugin: ArrayPipeline', ->
       results.get('firstObject.name').should.equal 'dgeb'
       results.get('lastObject.name').should.equal 'trek'
       
-    # it 'filters by selection then sorts then paginates', ->
-    #   pipeline = Em.ArrayProxy.createWithMixins Em.ArrayPipelineMixin,
-    #     content: @books
-    #     page: 1
-    #     plugins: [SelectedPipe, SortPipe, PagePipe]
+    it 'filters by selection then sorts then paginates', ->
+      pipeline = Em.ArrayProxy.createWithMixins Em.ArrayPipelineMixin,
+        content: @books
+        page: 1
+        plugins: [SelectedPipe, SortPipe, PagePipe]
 
-    #   results = pipeline.get('results')
+      results = pipeline.get('results')
 
-    #   results.get('length').should.equal(3)
-    #   results.get('lastObject.name').should.equal 'luke'
+      results.get('length').should.equal(3)
+      results.get('lastObject.name').should.equal 'luke'
 
-    #   pipeline.set('page', 2)
-    #   results.get('length').should.equal(6)
-    #   results.get('lastObject.name').should.equal 'trek'
+      pipeline.set('page', 2)
+      results.get('length').should.equal(6)
+      results.get('lastObject.name').should.equal 'trek'
