@@ -16,7 +16,7 @@
       @default []
     */
 
-    results: Ember.computed(function(key, value) {
+    results: Ember.computed('content', function(key, value) {
       var processors;
       if (arguments.length === 1) {
         processors = this.get('_processors');
