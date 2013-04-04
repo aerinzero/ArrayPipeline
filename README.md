@@ -91,8 +91,10 @@ If we were to change the ```age``` property on a book:
   * Chaining plugins together
   * Primitive observation firing (does not handle controller.<property> observations)
 
-# What Doesn't Work Yet
+# What Kinda Works
   * Observation firing *(currently WIP and will be pushed to wip branch)*
+
+# What Doesn't Work Yet
   * Adding / Removing objects from array
   * Support for side-operations
   * Changing observed properties within a PipePlugin
