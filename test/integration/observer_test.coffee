@@ -14,19 +14,19 @@ Book = Em.Object.extend
 
 Pipe1 = Em.PipePlugin.extend
   observes: ['isSelected']
-  process: (inputArr) -> 
+  process: (inputArr) ->
     firedPlugins.pushObject 'pipe1'
     return inputArr
 
 Pipe2 = Em.PipePlugin.extend
   observes: ['isSelected', 'name']
-  process: (inputArr) -> 
+  process: (inputArr) ->
     firedPlugins.pushObject 'pipe2'
     return inputArr
 
 Pipe3 = Em.PipePlugin.extend
   observes: ['isSelected', 'name', 'year']
-  process: (inputArr) -> 
+  process: (inputArr) ->
     firedPlugins.pushObject 'pipe3'
     return inputArr
 
@@ -66,7 +66,7 @@ describe 'Observers:', ->
   describe 'PipePlugin', ->
     it 'registers observers for each property in "observes" if it is the firstResponder', ->
       # Our fired list should start at 0
-      firedPlugins.get('length').should.equal(0)  
+      firedPlugins.get('length').should.equal(0)
 
       # After getting results, our fired list should be at 3
       pipeline.get('results')
@@ -98,6 +98,18 @@ describe 'Observers:', ->
 
       # pipe plugin should have refired
       firedPlugins.toArray().should.deep.equal(['pipe4'])
+
+    it 'is fired when arrayContent is added', ->
+      pipeline.get('results')
+
+      # Our fired list should start at 3
+      firedPlugins.get('length').should.equal(3)
+
+      newBook = Book.create(name:'Andy', isSelected: false, year: 2014)
+      pipeline.get('content').pushObject(newBook)
+
+      # Our fired list should be at 6
+      firedPlugins.get('length').should.equal(6)
 
   describe 'ArrayPipeline', ->
     it 'updates the results set when you change the backing array content', ->
