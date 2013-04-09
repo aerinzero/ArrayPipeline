@@ -13,23 +13,15 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
   ###
   results: Ember.computed 'content', (key,value) ->
     # Getter
-    if arguments.length == 1 
-      # determine where to start processing
-      processors = @get('_processors')
-
-      # for each processor we have on and after the cursor, we want to trigger a recalculate
-      forEach(processors, (processor) -> processor._recalculate() )
-
-      # Return our last result set or our content if we have no processors
-      if processors.length then return @get('_processors.lastObject._prevResults') else return @get('content')
-
+    if arguments.length == 1
+      return @_recalculatedResults()
     # Setter
     else
-      return value  
+      return value
 
 
   ###
-    An array of plugins to use for processing.  It's okay to mix constants and strings as part of 
+    An array of plugins to use for processing.  It's okay to mix constants and strings as part of
     this definition.
 
     @property plugins
@@ -43,7 +35,7 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
     @private
 
     An Array of instantiated plugins to use for the processing.
-  
+
     @property _processors
     @type Array
     @default []
@@ -83,12 +75,12 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
 
   ###
     @private
-  
+
     Construct the pipeline plugins, register observers, and begin processing on our Array content.
 
     @method init
-  ### 
-  init: -> 
+  ###
+  init: ->
     @_super()
 
     # Set our content to a blank array if we do not have a content array set
@@ -106,13 +98,13 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
   ###
     @private
 
-    Take in a constant or string of a PipePlugin, and push an instance of the plugin into our 
+    Take in a constant or string of a PipePlugin, and push an instance of the plugin into our
     _processors array.
-  
+
     TODO: Assertions for classes passed in that are not defined
 
     @method _initPlugin
-    @param {Em.PipePlugin} plugin 
+    @param {Em.PipePlugin} plugin
   ###
   _initPlugin: (plugin) ->
     plugin = get(plugin) if typeof plugin == 'string'
@@ -154,7 +146,7 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
   ###
     @private
     @needsTest
-  
+
     This is used for obtaining our observer keys that pertain to our controller
 
     @method _observerKeysForController
@@ -175,7 +167,7 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
   ###
     @private
     @needsTest
-  
+
     This is used for obtaining our observer keys that pertain to our objects
 
     @method _observerKeysForController
@@ -185,7 +177,7 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
 
     # Filter out only those keys beginning w/ controller and strip off the controller. prefix
     if @get('_observerMap')?
-      return @get('_observerMap').keys.toArray().filter (key) -> 
+      return @get('_observerMap').keys.toArray().filter (key) ->
         return !key.match(regex)
     else
       return []
@@ -260,7 +252,7 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
     beginProcessor = @get('_observerMap').get(changeKey)
     beginIndex = @get('_processors').indexOf(beginProcessor)
 
-    # We recalculate for each processor on/after the given processor 
+    # We recalculate for each processor on/after the given processor
     processor._recalculate() for processor in @get('_processors')[beginIndex..]
 
     # We update our results to reflect
@@ -272,8 +264,8 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
     @private
     @needsTest
     @todo
-  
-    Used to handle when our content array changes. 
+
+    Used to handle when our content array changes.
     This needs to be implemented in a more efficient way
 
     @method pipelineContentWillChange
@@ -284,10 +276,55 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
     @private
     @needsTest
     @todo
-  
-    Used to handle when our content array changes. 
+
+    Used to handle when our content array changes.
     This needs to be implemented in a more efficient way
 
     @method pipelineContentDidChange
   ###
   pipelineContentDidChange: (-> @_registerObservers() ).observes('content')
+
+  ###
+    @private
+
+    This method recalcuates all changes in the Pipeline and returns the results
+    array with the recalculations.
+
+    @method _recalculatedResults
+  ###
+  _recalculatedResults: ->
+    # determine where to start processing
+    processors = @get('_processors')
+
+    # for each processor we have on and after the cursor, we want to trigger a recalculate
+    forEach(processors, (processor) -> processor._recalculate() )
+
+    # Return our last result set or our content if we have no processors
+    if processors.length then return @get('_processors.lastObject._prevResults') else return @get('content')
+
+
+  ###
+    Used to handle when an item is added or removed from our content array
+  ###
+  arrayContentDidChange: (startIdx, removeAmt, addAmt) ->
+    @_super(startIdx, removeAmt, addAmt)
+
+    if addAmt > 0
+      # Add observers to newly added items
+      self = this
+      newItems = @get('content').slice(startIdx, addAmt)
+      objectKeys = @get('_observerKeysForObjects')
+
+      forEach( newItems, (item) ->
+        forEach( objectKeys, (observerKey) ->
+          item.addObserver(observerKey, self, self._processChanges)
+        )
+      )
+
+      # Update our recalculated results
+      results = @_recalculatedResults()
+      @set('results', results)
+
+    if removeAmt > 0
+      # Remove observers here
+      return 0
