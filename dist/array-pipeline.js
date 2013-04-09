@@ -16,24 +16,15 @@
       @default []
     */
 
-    results: Ember.computed(function(key, value) {
-      var processors;
+    results: Ember.computed('content', function(key, value) {
       if (arguments.length === 1) {
-        processors = this.get('_processors');
-        forEach(processors, function(processor) {
-          return processor._recalculate();
-        });
-        if (processors.length) {
-          return this.get('_processors.lastObject._prevResults');
-        } else {
-          return this.get('content');
-        }
+        return this._recalculatedResults();
       } else {
         return value;
       }
     }),
     /*
-      An array of plugins to use for processing.  It's okay to mix constants and strings as part of 
+      An array of plugins to use for processing.  It's okay to mix constants and strings as part of
       this definition.
     
       @property plugins
@@ -75,6 +66,7 @@
 
     previousResults: function(plugin) {
       var index;
+
       index = this.get('_processors').indexOf(plugin);
       if (index === -1) {
         return [];
@@ -104,7 +96,7 @@
     /*
       @private
     
-      Take in a constant or string of a PipePlugin, and push an instance of the plugin into our 
+      Take in a constant or string of a PipePlugin, and push an instance of the plugin into our
       _processors array.
     
       TODO: Assertions for classes passed in that are not defined
@@ -131,6 +123,7 @@
 
     _configurePlugins: function() {
       var _this = this;
+
       if (this.get('plugins') == null) {
         this.set('plugins', []);
       }
@@ -149,6 +142,7 @@
 
     _configureObserverMap: function() {
       var map;
+
       map = Em.Map.create();
       forEach(this.get('_processors'), function(processor) {
         return forEach(processor.get('observes'), function(observer) {
@@ -170,11 +164,13 @@
 
     _observerKeysForController: (function() {
       var observerKeys, regex;
+
       regex = new RegExp('^controller.(.+)$');
       observerKeys = [];
       if (this.get('_observerMap') != null) {
         this.get('_observerMap').keys.toArray().forEach(function(key) {
           var match;
+
           match = key.match(regex);
           if (match != null) {
             return observerKeys.pushObject(match[1]);
@@ -194,6 +190,7 @@
 
     _observerKeysForObjects: (function() {
       var regex;
+
       regex = new RegExp('^controller.(.+)$');
       if (this.get('_observerMap') != null) {
         return this.get('_observerMap').keys.toArray().filter(function(key) {
@@ -214,6 +211,7 @@
 
     _registerObservers: function() {
       var content, controller, controllerKeys, objectKeys, self;
+
       self = this;
       content = this.get('content') || [];
       controller = this.get('controller');
@@ -239,6 +237,7 @@
 
     _unregisterObservers: function() {
       var content, controllerKeys, objectKeys, self;
+
       self = this;
       content = this.get('content') || [];
       objectKeys = this.get('_observerKeysForObjects');
@@ -265,9 +264,7 @@
 
     _processChanges: function(changeObj, changeKey) {
       var beginIndex, beginProcessor, processor, results, _i, _len, _ref;
-      if (changeObj === this) {
-        changeKey = "controller." + changeKey;
-      }
+
       beginProcessor = this.get('_observerMap').get(changeKey);
       beginIndex = this.get('_processors').indexOf(beginProcessor);
       _ref = this.get('_processors').slice(beginIndex);
@@ -283,7 +280,7 @@
       @needsTest
       @todo
     
-      Used to handle when our content array changes. 
+      Used to handle when our content array changes.
       This needs to be implemented in a more efficient way
     
       @method pipelineContentWillChange
@@ -297,7 +294,7 @@
       @needsTest
       @todo
     
-      Used to handle when our content array changes. 
+      Used to handle when our content array changes.
       This needs to be implemented in a more efficient way
     
       @method pipelineContentDidChange
@@ -305,7 +302,53 @@
 
     pipelineContentDidChange: (function() {
       return this._registerObservers();
-    }).observes('content')
+    }).observes('content'),
+    /*
+      @private
+    
+      This method recalcuates all changes in the Pipeline and returns the results
+      array with the recalculations.
+    
+      @method _recalculatedResults
+    */
+
+    _recalculatedResults: function() {
+      var processors;
+
+      processors = this.get('_processors');
+      forEach(processors, function(processor) {
+        return processor._recalculate();
+      });
+      if (processors.length) {
+        return this.get('_processors.lastObject._prevResults');
+      } else {
+        return this.get('content');
+      }
+    },
+    /*
+      Used to handle when an item is added or removed from our content array
+    */
+
+    arrayContentDidChange: function(startIdx, removeAmt, addAmt) {
+      var newItems, objectKeys, results, self;
+
+      this._super(startIdx, removeAmt, addAmt);
+      if (addAmt > 0) {
+        self = this;
+        newItems = this.get('content').slice(startIdx, addAmt);
+        objectKeys = this.get('_observerKeysForObjects');
+        forEach(newItems, function(item) {
+          return forEach(objectKeys, function(observerKey) {
+            return item.addObserver(observerKey, self, self._processChanges);
+          });
+        });
+        results = this._recalculatedResults();
+        this.set('results', results);
+      }
+      if (removeAmt > 0) {
+        return 0;
+      }
+    }
   });
 
   Em.PipePlugin = Em.Object.extend({
@@ -374,6 +417,7 @@
 
     _recalculate: function() {
       var lastResult, results;
+
       lastResult = this._lastResult() || [];
       results = this.process(lastResult);
       return this.set('_prevResults', results);
