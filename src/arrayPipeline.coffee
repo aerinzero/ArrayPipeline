@@ -302,6 +302,18 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
     # Return our last result set or our content if we have no processors
     if processors.length then return @get('_processors.lastObject._prevResults') else return @get('content')
 
+  ###
+    @private
+    @todo
+
+    This is called in an Ember.run.once so we only try to update our result array one time
+    as our manyArray populates.
+
+    @method _updateResults
+  ###
+  _updateResults: ->
+    results = @_recalculatedResults()
+    @set('results', results)
 
   ###
     Used to handle when an item is added or removed from our content array
@@ -322,8 +334,7 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
       )
 
       # Update our recalculated results
-      results = @_recalculatedResults()
-      @set('results', results)
+      Ember.run.once(this, '_updateResults')
 
     if removeAmt > 0
       # Remove observers here
