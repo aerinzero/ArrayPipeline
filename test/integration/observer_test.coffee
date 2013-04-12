@@ -36,6 +36,13 @@ Pipe4 = Em.PipePlugin.extend
     firedPlugins.pushObject 'pipe4'
     return inputArr
 
+Pipe5 = Em.PipePlugin.extend
+  observes: ['controller.selectedAuthor']
+  process: (inputArr) ->
+    firedPlugins.pushObject 'pipe5'
+    return inputArr
+    
+
 beforeEach ->
   firedPlugins = []
 
@@ -98,4 +105,30 @@ describe 'Observer: ArrayPipeline', ->
 
       # pipe plugin should have refired
       firedPlugins.toArray().should.deep.equal(['pipe4'])
+
+    it 'correctly registers and fires observers for controller properties', ->
+      # Our fired list should start at 0
+      firedPlugins.get('length').should.equal(0)
+
+      books = [
+        Book.create(name: "andy", isSelected: false, year: 2012)
+        Book.create(name: "tom", isSelected: true, year: 2013)
+      ]
+
+      pipeline = Em.ArrayProxy.createWithMixins Em.ArrayPipelineMixin,
+        content: books
+        selectedBook: null
+        selectedAuthor: null
+        plugins: [Pipe4, Pipe5]
+
+      # After getting results, our fired list should be at 3
+      pipeline.get('results')
+      firedPlugins.get('length').should.equal(2)
+
+      # After we set the first in the pipe, we should have 4 total changes
+      pipeline.set('selectedBook', 'moooo')
+      firedPlugins.get('length').should.equal(4)
+
+      pipeline.set('selectedAuthor', 'foo')
+      firedPlugins.get('length').should.equal(5)
 

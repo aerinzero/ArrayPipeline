@@ -257,6 +257,9 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
     @param {String} key that is changing
   ###
   _processChanges: (changeObj, changeKey) ->
+    # If this is our controller object, we need to prepend "controller." to the change key
+    changeKey = "controller.#{changeKey}" if changeObj == @
+
     # We start off by getting the position in the pipeline for where to recalculate changes
     beginProcessor = @get('_observerMap').get(changeKey)
     beginIndex = @get('_processors').indexOf(beginProcessor)
