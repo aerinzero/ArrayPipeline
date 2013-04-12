@@ -14,19 +14,19 @@ Book = Em.Object.extend
 
 Pipe1 = Em.PipePlugin.extend
   observes: ['isSelected']
-  process: (inputArr) -> 
+  process: (inputArr) ->
     firedPlugins.pushObject 'pipe1'
     return inputArr
 
 Pipe2 = Em.PipePlugin.extend
   observes: ['isSelected', 'name']
-  process: (inputArr) -> 
+  process: (inputArr) ->
     firedPlugins.pushObject 'pipe2'
     return inputArr
 
 Pipe3 = Em.PipePlugin.extend
   observes: ['isSelected', 'name', 'year']
-  process: (inputArr) -> 
+  process: (inputArr) ->
     firedPlugins.pushObject 'pipe3'
     return inputArr
 
@@ -68,12 +68,12 @@ beforeEach ->
 # Tests
 ###
 
-describe 'Observer: ArrayPipeline', ->
+describe 'Observers:', ->
 
-  describe 'each PipePlugin', ->
+  describe 'PipePlugin', ->
     it 'registers observers for each property in "observes" if it is the firstResponder', ->
       # Our fired list should start at 0
-      firedPlugins.get('length').should.equal(0)  
+      firedPlugins.get('length').should.equal(0)
 
       # After getting results, our fired list should be at 3
       pipeline.get('results')
@@ -132,3 +132,45 @@ describe 'Observer: ArrayPipeline', ->
       pipeline.set('selectedAuthor', 'foo')
       firedPlugins.get('length').should.equal(5)
 
+    it 'is fired when arrayContent is added', ->
+      pipeline.get('results')
+
+      # Our fired list should start at 3
+      firedPlugins.get('length').should.equal(3)
+
+      newBook = Book.create(name:'Andy', isSelected: false, year: 2014)
+      pipeline.get('content').pushObject(newBook)
+
+      # Our fired list should be at 6
+      firedPlugins.get('length').should.equal(6)
+
+  describe 'ArrayPipeline', ->
+    it 'updates the results set when you change the backing array content', ->
+      arrayOne = [Book.create(name:'foo')]
+      arrayTwo = [Book.create(name:'bar')]
+
+      pipeline = Em.ArrayProxy.createWithMixins Em.ArrayPipelineMixin,
+        content: arrayOne
+        plugins: []
+
+      pipeline.get('results').should.deep.equal(arrayOne)
+
+      pipeline.set('content', arrayTwo)
+      pipeline.get('results').should.deep.equal(arrayTwo)
+
+    it 'unregisters observers from the previous backing array content when changed', ->
+      arrayOne = [Book.create(name:'foo')]
+      arrayTwo = [Book.create(name:'foo')]
+
+      Plugin = Em.PipePlugin.extend
+        observes: ['name']
+        process: (inputArr) -> return inputArr
+
+      pipeline = Em.ArrayProxy.createWithMixins Em.ArrayPipelineMixin,
+        content: arrayOne
+        plugins: [Plugin]
+
+      Ember.observersFor(arrayOne.get('firstObject'), 'name').length.should.equal(1)
+
+      pipeline.set('content', arrayTwo)
+      Ember.observersFor(arrayOne.get('firstObject'), 'name').length.should.equal(0)

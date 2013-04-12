@@ -13,14 +13,14 @@ SelectedPipe = Em.PipePlugin.extend
 
 SortPipe = Em.PipePlugin.extend
   observes: ['name']
-  process: (inputArr) -> 
+  process: (inputArr) ->
     inputArr.sort (obj1, obj2) -> Em.compare(obj1.get('name'), obj2.get('name'))
 
 PagePipe = Em.PipePlugin.extend
   observes: ['controller.page']
   pageBinding: 'controller.page'
   numPerPage: 3
-  process: (inputArr) -> 
+  process: (inputArr) ->
     endIdx = @get('page') * @get('numPerPage')
     inputArr.slice(0,endIdx)
 
@@ -71,7 +71,7 @@ describe 'Plugin: ArrayPipeline', ->
       results.get('length').should.equal(6)
       results.get('firstObject.name').should.equal 'dgeb'
       results.get('lastObject.name').should.equal 'trek'
-      
+
     # it 'filters by selection then sorts then paginates', ->
     #   pipeline = Em.ArrayProxy.createWithMixins Em.ArrayPipelineMixin,
     #     content: @books

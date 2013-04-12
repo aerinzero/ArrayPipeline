@@ -4,7 +4,7 @@ describe 'Init: ArrayPipeline', ->
 
   it 'has equal results and content arrays when no plugins are defined', ->
     sourceArray = ['one','two','three']
-      
+
     pipeline = Em.ArrayProxy.createWithMixins Ember.ArrayPipelineMixin,
       content: sourceArray
 
