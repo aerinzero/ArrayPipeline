@@ -261,6 +261,7 @@ Ember.ArrayPipelineMixin = Ember.Mixin.create
     # We update our results to reflect
     results = @get('_processors.lastObject._prevResults')
     @set('results', results)
+    @propertyDidChange('results')
 
 
   ###
