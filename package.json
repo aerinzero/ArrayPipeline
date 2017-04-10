@@ -17,7 +17,7 @@
     "chai": "*",
     "jsdom": "*",
     "jquery": "*",
-    "coffee-script": "*",
+    "coffee-script": ">=1.12.5",
     "mocha": "*"
   }
 }
