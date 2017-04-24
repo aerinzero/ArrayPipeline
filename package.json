@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "chai": "*",
-    "jsdom": "*",
+    "jsdom": ">=10.0.0",
     "jquery": "*",
     "coffee-script": "*",
     "mocha": "*"
