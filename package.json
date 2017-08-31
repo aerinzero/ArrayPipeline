@@ -14,7 +14,7 @@
     "url": "git://github.com/Mochaleaf/ArrayPipeline.git"
   },
   "dependencies": {
-    "chai": "*",
+    "chai": ">=4.1.2",
     "jsdom": "*",
     "jquery": "*",
     "coffee-script": "*",
